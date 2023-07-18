@@ -2,9 +2,10 @@
   "name": "next-engine",
   "version": "1.1",
   "description": "Nextengine API for Nodejs",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "lint": "standard --verbose index.js Entity/*.js lib/**/*.js test/*.js",
+    "build": "tsc",
+    "lint": "eslint --fix index.ts Entity/*.ts lib/**/*.ts test/*.ts",
     "test": "$(npm bin)/istanbul cover _mocha -- -R spec"
   },
   "repository": {
@@ -25,9 +26,14 @@
     "object-path": "^0.11.2"
   },
   "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/jest": "^29.5.3",
+    "@types/object-path": "^0.11.1",
+    "@types/sinon": "^10.0.15",
     "csv-stringify": "^1.0.4",
     "dotenv": "^2.0.0",
     "es6-promisify": "^5.0.0",
+    "eslint": "^3.10.2",
     "glob": "^7.1.1",
     "istanbul": "^0.4.5",
     "mocha": "^3.1.2",

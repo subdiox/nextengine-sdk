@@ -1,4 +1,5 @@
 # node-nextengine
+
 [![codecov](https://codecov.io/gh/Leko/node-nextengine/branch/master/graph/badge.svg)](https://codecov.io/gh/Leko/node-nextengine)
 
 [![NPM](https://nodei.co/npm/next-engine.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/next-engine/)
@@ -22,23 +23,25 @@ See [passport-nextengine](https://github.com/Leko/passport-nextengine) source an
 ## Basic request
 
 ```js
-const Nextengine = require('next-engine')
+import Nextengine from "next-engine";
 
 const client = new Nextengine({
-  clientId: 'XXXXXXXXXX',
-  clientSecret: 'XXXXXXXXXX',
-  accessToken: 'XXXXXXXXXX',
-  refreshToken: 'XXXXXXXXXX'
-})
+  clientId: "XXXXXXXXXX",
+  clientSecret: "XXXXXXXXXX",
+  accessToken: "XXXXXXXXXX",
+  refreshToken: "XXXXXXXXXX",
+});
 
-client.request('/api_v1_receiveorder_base/count', {
-  'receive_order_shop_id-eq': 1
-})
-  .then(res => console.log('then:', res.count))
-  .catch(e => console.error('catch:', e))
+client
+  .request("/api_v1_receiveorder_base/count", {
+    "receive_order_shop_id-eq": 1,
+  })
+  .then((res) => console.log("then:", res.count))
+  .catch((e) => console.error("catch:", e));
 ```
 
 ### Note
+
 We strongly recommended that **you don't use `request` method**.  
 Because it depends strongly on v1 specification.  
 Utility methods (`query -> get|count|getInBatches`, `create`, `update`, `upload`, `waitFor` and `uploadAndWaitFor`) are To reduce the dependency of v1.  
@@ -48,40 +51,44 @@ So please use utility methods as far as possible.
 
 ```js
 // Query by path string(ex. /api_v1_receiveorder_base/count)
-client.query('receiveorder_base')
-  .where('receive_order_date', '>=', '2016-12-25 23:59:59')
+client
+  .query("receiveorder_base")
+  .where("receive_order_date", ">=", "2016-12-25 23:59:59")
   .count()
-  .then(count => console.log(count))
+  .then((count) => console.log(count));
 
 // Query by Entity object
-const { ReceiveOrder } = require('next-engine/Entity')
-client.query(ReceiveOrder)
-  .where('receive_order_id', '<>', 1)
+import { ReceiveOrder } from "next-engine/Entity";
+client
+  .query(ReceiveOrder)
+  .where("receive_order_id", "<>", 1)
   .count()
-  .then(count => console.log(count))
+  .then((count) => console.log(count));
 
 // Get records
-const { Goods } = require('next-engine/Entity')
-client.query(Goods)
-  .where('goods_id', 'abc')
+import { Goods } from "next-engine/Entity";
+client
+  .query(Goods)
+  .where("goods_id", "abc")
   .limit(500)
   .offset(350)
   .get()
-  .then(results => console.log(results))
+  .then((results) => console.log(results));
 
 // Get all records in batch
-const { ReceiveOrder } = require('next-engine/Entity')
-client.query(ReceiveOrder)
+import { ReceiveOrder } from "next-engine/Entity";
+client
+  .query(ReceiveOrder)
   .limit(300)
-  .getInBatches(partial => console.log(partial))
-  .then(() => console.log('Done'))
+  .getInBatches((partial) => console.log(partial))
+  .then(() => console.log("Done"));
 ```
 
 ## Create / Update utility
 
 ```js
 // Create shop
-const { Shop } = require('next-engine/Entity')
+import { Shop } from "next-engine/Entity";
 const opts = {
   data: `
     <?xml version="1.0" encoding="utf-8"?>
@@ -95,17 +102,16 @@ const opts = {
         <shop_currency_unit_id>1</shop_currency_unit_id>
       </shop>
     </root>
-  `
-}
+  `,
+};
 
-client.create(Shop, opts)
-  .then(res => res.result)
+client.create(Shop, opts).then((res) => res.result);
 
 // Update shop
-const { Shop } = require('next-engine/Entity')
+import { Shop } from "next-engine/Entity";
 const opts = {
   receive_order_id: 1,
-  receive_order_last_modified_date: '2016/01/01 00:00:00',
+  receive_order_last_modified_date: "2016/01/01 00:00:00",
   data: `
     <?xml version="1.0" encoding="utf-8"?>
     <root>
@@ -126,41 +132,42 @@ const opts = {
         </receive_order_row_no>
       </receiveorder_row>
     </root>
-  `
-}
+  `,
+};
 
-client.update(Shop, opts)
-  .then(res => res.result)
+client.update(Shop, opts).then((res) => res.result);
 ```
 
 ## Upload / Queue utility
 
 ```js
-const zlib = require('zlib')
-const promisify = require('es6-promisify')
-const stringify = promisify(require('csv-stringify'))
-const deflate = promisify(zlib.deflate)
-const { UploadQueue } = require('next-engine/Entity')
+import zlib from "zlib";
+import promisify from "es6-promisify";
+const stringify = promisify(require("csv-stringify"));
+const deflate = promisify(zlib.deflate);
+import { UploadQueue } from "next-engine/Entity";
 
 input = [
-  ['syohin_code', 'jan_code'],
-  [ 'abc', '1234567890' ]
-]
+  ["syohin_code", "jan_code"],
+  ["abc", "1234567890"],
+];
 stringify(input)
-  .then(csv => deflate(csv))
-  .then(gz => client.upload({ data_type: 'gz', data: gz }))
-  .then(queueId => client.waitFor(queueId, [UploadQueue.COMPLETED, UploadQueue.FAILED]))
-  .then(() => console.log('Imported!'))
+  .then((csv) => deflate(csv))
+  .then((gz) => client.upload({ data_type: "gz", data: gz }))
+  .then((queueId) =>
+    client.waitFor(queueId, [UploadQueue.COMPLETED, UploadQueue.FAILED])
+  )
+  .then(() => console.log("Imported!"));
 
 // Or
 input = [
-  ['syohin_code', 'jan_code'],
-  [ 'abc', '1234567890' ]
-]
+  ["syohin_code", "jan_code"],
+  ["abc", "1234567890"],
+];
 stringify(input)
-  .then(csv => deflate(csv))
-  .then(gz => client.uploadAndWaitFor({ data_type: 'gz', data: gz }))
-  .then(() => console.log('Imported!'))
+  .then((csv) => deflate(csv))
+  .then((gz) => client.uploadAndWaitFor({ data_type: "gz", data: gz }))
+  .then(() => console.log("Imported!"));
 ```
 
 ## Contributing
